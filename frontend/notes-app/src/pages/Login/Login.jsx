@@ -1,4 +1,4 @@
-import React, { useState } from "react";  
+import React, { useState } from "react";  
 import Navbar from "../../components/Navbar/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordInput from "../../components/Input/PasswordInput";
@@ -15,7 +15,6 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        // Correctly call validateEmail and pass email to it
         if(!validateEmail(email)) {
             setError("Please enter a valid email address");
             return;
@@ -26,7 +25,6 @@ const Login = () => {
             return;
         }
 
-        // Reset error if validation passes
         setError(null);
 
         // login api call
@@ -51,36 +49,45 @@ const Login = () => {
 
     return (
         <> 
-            <Navbar/>
+            {/* The Navbar will appear on login page, if desired, otherwise remove */}
+            {/* <Navbar/> */} 
 
-            <div className="flex items-center justify-center mt-28">
-                <div className="w-96 border rounded bg-white px-7 py-10">
+            {/* Main container for the login page, using a light background color and centering content */}
+            <div className="flex items-center justify-center min-h-screen bg-background-light p-4">
+                {/* Form container: card-like appearance with shadow, rounded corners, and fade-in animation */}
+                <div className="w-full md:w-96 border border-gray-200 rounded-xl bg-white px-7 py-10 shadow-lg animate-fadeIn">
                     <form onSubmit={handleLogin}>
-                        <h4 className="text-2xl mb-7">Login</h4>
+                        <h4 className="text-3xl font-bold text-center mb-8 text-primary">Login</h4>
 
+                        {/* Email Input */}
                         <input 
                             type="text" 
                             placeholder="Email" 
-                            className="input-box" 
+                            // Custom input-box styling for better focus feedback
+                            className="input-box w-full text-sm bg-gray-50 border-2 border-gray-200 px-5 py-3 rounded-md mb-4 outline-none focus:border-primary transition-colors duration-200" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)}
                         />
 
-                        <PasswordInput  
+                        {/* Password Input (assuming PasswordInput component has its own internal styling) */}
+                        <PasswordInput  
                             value={password} 
                             onChange={(e) => setPassword(e.target.value)}
                         />
 
-                        {error && <p className="text-red-500 text-xs pb-1">{error}</p>}
+                        {error && <p className="text-red-500 text-xs pb-1 text-center mt-2">{error}</p>}
 
-                        <button type="submit" className="btn-primary">
+                        {/* Login Button: using custom primary color with hover effect */}
+                        <button type="submit" 
+                                className="w-full bg-primary text-white p-3 rounded-md my-4 hover:bg-primary-dark transition-colors duration-200">
                             Login
                         </button>
 
-                        <p className="text-sm text-center mt-4">
+                        {/* Link to Sign Up Page */}
+                        <p className="text-sm text-center mt-4 text-slate-600">
                             Not Registered yet?{" "}
-                            <Link to="/signUp" className="font-medium text-primary underline">
-                            Create an Account
+                            <Link to="/signup" className="font-medium text-primary underline hover:text-primary-dark transition-colors duration-200">
+                                Create an Account
                             </Link>
                         </p>
                     </form>
@@ -91,3 +98,4 @@ const Login = () => {
 };
 
 export default Login;
+
