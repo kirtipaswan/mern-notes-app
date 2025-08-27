@@ -19,7 +19,7 @@ app.use(express.json());
 
 app.use(
     cors({
-        origin: '*',
+        origin: 'https://mern-notes-app-ashen.vercel.app',
     })
 );
 
