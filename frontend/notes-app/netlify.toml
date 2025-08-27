@@ -1,6 +1,11 @@
 [build]
+  base = "frontend/notes-app"
   command = "npm run build"
-  publish = "frontend/notes-app/dist"
-  ignore = "exit 0"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+
 
 
