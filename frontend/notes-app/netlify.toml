@@ -4,6 +4,8 @@
   ignore = "exit 0"
 
 # Disable all build plugins that are not explicitly installed in package.json
-[[plugins]]
-  package = "*"
-  disabled = true
+ [[plugins]]
+  package = "netlify-plugin-one"
+
+    [plugins.inputs]
+    port = 80
