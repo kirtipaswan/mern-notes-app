@@ -1,11 +1,9 @@
 [build]
-  # Tell Netlify to not run build extensions/plugins
   command = "npm run build"
   publish = "dist"
+  ignore = "exit 0"
 
-# Configure the 'neon' extension to be disabled during the build process
-  [[plugins]]
-  package = "netlify-plugin-one"
-
-    [plugins.inputs]
-    port = 80
+# Disable all build plugins that are not explicitly installed in package.json
+[[plugins]]
+  package = "*"
+  disabled = true
