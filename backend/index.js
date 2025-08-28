@@ -19,9 +19,10 @@ app.use(express.json());
 
 app.use(
     cors({
-       origin: [
-            'http://localhost:5173', // <--- Add your local development URL
-            'https://mern-notes-app-ashen.vercel.app' // <--- Your Vercel production URL
+        // IMPORTANT: Ensure your Vercel frontend URL is allowed here
+        origin: [
+            'http://localhost:5173', // For local development
+            'https://mern-notes-app-ashen.vercel.app' // Your deployed Vercel frontend URL
         ],
     })
 );
@@ -121,8 +122,9 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 
 // add note
 app.post("/add-note", authenticateToken, async (req, res) => {
-    const { title, content, tags } = req.body;
-    const user = req.user; // Now this should contain just the user object
+    // Destructure new fields: reminderTime and reminded
+    const { title, content, tags, reminderTime, reminded } = req.body; 
+    const user = req.user;
 
     if (!title) {
         return res.status(400).json({ error: true, message: "Title is required" });
@@ -137,7 +139,9 @@ app.post("/add-note", authenticateToken, async (req, res) => {
             title,
             content,
             tags: tags || [],
-            userId: user._id // This should now work correctly
+            userId: user._id,
+            reminderTime: reminderTime || null, // Save reminderTime
+            reminded: reminded || false,       // Save reminded status
         });
 
         await note.save();
@@ -151,10 +155,12 @@ app.post("/add-note", authenticateToken, async (req, res) => {
 // edit note
 app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
     const noteId = req.params.noteId;
-    const { title, content, tags, isPinned } = req.body;
+    // Destructure new fields: reminderTime and reminded
+    const { title, content, tags, isPinned, reminderTime, reminded } = req.body; 
     const user = req.user;
 
-    if (!title && !content && !tags && !isPinned) {
+    // Check if any changes are provided, including new fields
+    if (!title && !content && !tags && !isPinned && !reminderTime && reminded === undefined) {
         return res.status(400).json({ error: true, message: "No changes provided" });
     }
 
@@ -166,7 +172,9 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
         if (title) note.title = title;
         if (content) note.content = content;
         if (tags) note.tags = tags;
-        if (isPinned) note.isPinned = isPinned;
+        if (isPinned !== undefined) note.isPinned = isPinned; // Allow setting false
+        if (reminderTime !== undefined) note.reminderTime = reminderTime; // Update reminderTime
+        if (reminded !== undefined) note.reminded = reminded;           // Update reminded status
 
         await note.save();
 
@@ -200,7 +208,7 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
             return res.status(400).json({ error: true, message: "Note not found" });
         }
 
-        await Note.deleteOne();
+        await Note.deleteOne(); // This should be `await Note.deleteOne({_id: noteId, userId: user._id});`
 
         return res.json({ error: false, message: "Note deleted successfully" });
     } catch (error) {
@@ -230,6 +238,29 @@ app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
     }
 });
 
+// NEW ENDPOINT: Update reminder status (e.g., mark as reminded)
+app.put("/update-note-reminded/:noteId", authenticateToken, async (req, res) => {
+    const noteId = req.params.noteId;
+    const { reminded } = req.body; // Expecting a boolean value
+    const user = req.user;
+
+    try {
+        const note = await Note.findOne({ _id: noteId, userId: user._id });
+        if (!note) {
+            return res.status(400).json({ error: true, message: "Note not found" });
+        }
+
+        note.reminded = reminded; // Update the reminded status
+
+        await note.save();
+
+        return res.json({ error: false, note, message: "Note reminder status updated successfully" });
+    } catch (error) {
+        return res.status(400).json({ error: true, message: error.message });
+    }
+});
+
+
 // search notes
 app.get("/search-notes", authenticateToken, async (req, res) => {
     const user = req.user;
@@ -241,9 +272,9 @@ app.get("/search-notes", authenticateToken, async (req, res) => {
 
     try {
         const notes = await Note.find({ userId: user._id, $or: [
-            { title: { $regex: new  RegExp(query, 'i') } },
-            { content: { $regex: new  RegExp(query, 'i') } },
-            { tags: { $regex: new  RegExp(query, 'i') } }
+            { title: { $regex: new RegExp(query, 'i') } },
+            { content: { $regex: new RegExp(query, 'i') } },
+            { tags: { $regex: new RegExp(query, 'i') } }
         ] });
 
         return res.json({ error: false, notes, message: "Notes fetched successfully" });
@@ -257,4 +288,3 @@ app.listen(8000, () => {
 });
 
 module.exports = app;
-
