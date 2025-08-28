@@ -11,12 +11,35 @@ import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import AddNotesImg from "../../assets/images/add-note.png";
 import NoDataImg from "../../assets/images/no-data.png";
 
+// Add a function to check for reminders
+const checkReminders = (notes) => {
+    notes.forEach(note => {
+        if (note.reminderTime) {
+            const reminder = new Date(note.reminderTime);
+            const now = new Date();
+
+            if (now.getTime() >= reminder.getTime() && !note.reminded) {
+                // If the reminder time has passed, trigger the alert
+                alert(`Reminder for: ${note.title}\n\n${note.content}`);
+
+                // Play an alarm sound (optional)
+                const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+                audio.play();
+
+                // You would need to update the note in the backend to mark it as reminded
+                // You can add a new field to your note model, e.g., 'reminded: Boolean'
+                // axiosInstance.put(`/update-note-reminded/${note._id}`, { reminded: true });
+            }
+        }
+    });
+};
+
 const Home = () => {
 
     const [openAddEditModal, setOpenAddEditModal] = useState({
-    isShown: false,
-    type: "ADD",
-    data: null,
+        isShown: false,
+        type: "ADD",
+        data: null,
     });
 
     const [showToastMsg, setShowToastMessage] = useState({
@@ -138,6 +161,19 @@ const Home = () => {
         setIsSearch(false);
         getAllNotes();
     }
+
+    // Use useEffect to check for reminders every minute
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (allNotes.length > 0) {
+                checkReminders(allNotes);
+            }
+        }, 60000); // Check every 60 seconds
+
+        // Clean up the interval when the component unmounts
+        return () => clearInterval(interval);
+    }, [allNotes]); // Rerun when notes change
+
 
     useEffect(() => {
         getAllNotes();
