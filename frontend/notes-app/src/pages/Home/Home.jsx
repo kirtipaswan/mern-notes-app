@@ -23,7 +23,7 @@ const checkReminders = (notes) => {
                 alert(`Reminder for: ${note.title}\n\n${note.content}`);
 
                 // Play an alarm sound (optional)
-                const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+                const audio = new Audio('data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAZGF0YQAAAAAA');
                 audio.play();
 
                 // You would need to update the note in the backend to mark it as reminded
