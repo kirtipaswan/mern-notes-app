@@ -1,3 +1,5 @@
+// src/pages/Home/Home.jsx
+
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import NoteCard from "../../components/Cards/NoteCard";
@@ -11,28 +13,33 @@ import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import AddNotesImg from "../../assets/images/add-note.png";
 import NoDataImg from "../../assets/images/no-data.png";
 
-// Add a function to check for reminders
-const checkReminders = (notes) => {
-    notes.forEach(note => {
-        if (note.reminderTime) {
-            const reminder = new Date(note.reminderTime);
-            const now = new Date();
+// Function to play a subtle beep sound
+const playSubtleBeep = () => {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
 
-            if (now.getTime() >= reminder.getTime() && !note.reminded) {
-                // If the reminder time has passed, trigger the alert
-                alert(`Reminder for: ${note.title}\n\n${note.content}`);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-                // Play an alarm sound (optional)
-                const audio = new Audio('data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAZGF0YQAAAAAA');
-                audio.play();
+        oscillator.type = 'sine'; // A clean, simple tone
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // Volume (0.0 to 1.0)
 
-                // You would need to update the note in the backend to mark it as reminded
-                // You can add a new field to your note model, e.g., 'reminded: Boolean'
-                // axiosInstance.put(`/update-note-reminded/${note._id}`, { reminded: true });
-            }
-        }
-    });
+        oscillator.start();
+        // Stop the sound after a very short duration
+        oscillator.stop(audioContext.currentTime + 0.2); // 0.2 seconds
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out
+    } catch (e) {
+        console.error("Web Audio API not supported or error playing sound:", e);
+        // Fallback for browsers that don't support Web Audio API
+        // This is a very short, almost silent WAV data URI
+        const fallbackAudio = new Audio('data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAZGF0YQAAAAAA');
+        fallbackAudio.play();
+    }
 };
+
 
 const Home = () => {
 
@@ -114,7 +121,7 @@ const Home = () => {
                 showToastMessage("Note Deleted Successfully", "DELETE");
                 getAllNotes();
             }
-        } catch {
+        } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
                 console.log("An unexpected error occurred. Please try again later.");
             }
@@ -134,7 +141,7 @@ const Home = () => {
                 setIsSearch(true);
                 setAllNotes(response.data.notes);
             }
-        } catch {
+        } catch (error) {
             console.log("An unexpected error occurred. Please try again later.");
         }
     }
@@ -156,17 +163,38 @@ const Home = () => {
         }
     }
 
-    // handle clear search
-    const handleClearSearch = () => {
-        setIsSearch(false);
-        getAllNotes();
-    }
+    // NEW FUNCTION: Update the 'reminded' status in the backend
+    const updateRemindedStatus = async (noteId) => {
+        try {
+            await axiosInstance.put(`/update-note-reminded/${noteId}`, { reminded: true });
+            // After updating backend, refresh notes to get the latest status
+            getAllNotes();
+        } catch (error) {
+            console.error("Error updating reminded status:", error);
+        }
+    };
 
     // Use useEffect to check for reminders every minute
     useEffect(() => {
         const interval = setInterval(() => {
             if (allNotes.length > 0) {
-                checkReminders(allNotes);
+                const now = new Date();
+                allNotes.forEach(note => {
+                    if (note.reminderTime) {
+                        const reminder = new Date(note.reminderTime);
+
+                        // Only trigger if reminder time has passed and it hasn't been reminded yet
+                        if (now.getTime() >= reminder.getTime() && !note.reminded) {
+                            alert(`Reminder for: ${note.title}\n\n${note.content}`);
+                            
+                            // Play the subtle beep sound
+                            playSubtleBeep();
+
+                            // Call the new function to update the backend
+                            updateRemindedStatus(note._id);
+                        }
+                    }
+                });
             }
         }, 60000); // Check every 60 seconds
 
@@ -174,6 +202,11 @@ const Home = () => {
         return () => clearInterval(interval);
     }, [allNotes]); // Rerun when notes change
 
+    // handle clear search
+    const handleClearSearch = () => {
+        setIsSearch(false);
+        getAllNotes();
+    }
 
     useEffect(() => {
         getAllNotes();
@@ -187,7 +220,7 @@ const Home = () => {
 
             <div className="container mx-auto">
                 {allNotes.length>0 ? (
-                <div className="grid grid-cols-3 gap-4 mt-8">
+                <div className="grid grid-cols-3 gap-4 mt-8 pb-20"> {/* Added pb-20 to ensure space above the button */}
                     {allNotes.map((item, index) => (
                         <NoteCard 
                         key={item._id}
@@ -207,7 +240,8 @@ const Home = () => {
                 )}
             </div>
 
-            <button className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 absolute right-10 bottom-10" 
+            {/* Positioned the Add button to be fixed at the bottom right */}
+            <button className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 fixed right-4 bottom-4 md:right-10 md:bottom-10 z-50 shadow-lg" 
                     onClick={() => {
                         setOpenAddEditModal({
                             isShown: true,
@@ -228,7 +262,8 @@ const Home = () => {
                         },
                     }}
                     contentLabel=""
-                    className="w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 overflow-scroll"
+                    // Adjusted modal class for better responsiveness and added overflow-y-auto for scrolling
+                    className="w-[90%] md:w-[40%] max-h-[90vh] bg-white rounded-md mx-auto mt-8 p-5 overflow-y-auto"
                     >
 
                     <AddEditNotes
@@ -258,3 +293,4 @@ const Home = () => {
 };
 
 export default Home;
+
