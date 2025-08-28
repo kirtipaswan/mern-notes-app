@@ -19,7 +19,10 @@ app.use(express.json());
 
 app.use(
     cors({
-        origin: 'https://mern-notes-app-ashen.vercel.app',
+       origin: [
+            'http://localhost:5173', // <--- Add your local development URL
+            'https://mern-notes-app-ashen.vercel.app' // <--- Your Vercel production URL
+        ],
     })
 );
 
