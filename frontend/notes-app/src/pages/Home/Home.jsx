@@ -1,5 +1,3 @@
-// src/pages/Home/Home.jsx
-
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import NoteCard from "../../components/Cards/NoteCard";
@@ -160,7 +158,7 @@ const Home = () => {
             }
         } catch(error) {
             console.log("An unexpected error occurred. Please try again later.");
-        }
+            }
     }
 
     // NEW FUNCTION: Update the 'reminded' status in the backend
@@ -218,9 +216,9 @@ const Home = () => {
         <>
             <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch} />
 
-            <div className="container mx-auto">
+            <div className="container mx-auto pt-4">
                 {allNotes.length>0 ? (
-                <div className="grid grid-cols-3 gap-4 mt-8 pb-20"> {/* Added pb-20 to ensure space above the button */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"> {/* Adjusted for better responsiveness and scroll space */}
                     {allNotes.map((item, index) => (
                         <NoteCard 
                         key={item._id}
@@ -263,7 +261,7 @@ const Home = () => {
                     }}
                     contentLabel=""
                     // Adjusted modal class for better responsiveness and added overflow-y-auto for scrolling
-                    className="w-[90%] md:w-[40%] max-h-[90vh] bg-white rounded-md mx-auto mt-8 p-5 overflow-y-auto"
+                    className="w-[90%] md:w-[40%] max-h-[90vh] bg-white rounded-md mx-auto p-14 mt-8 overflow-y-auto"
                     >
 
                     <AddEditNotes
@@ -281,6 +279,7 @@ const Home = () => {
                         showToastMessage={showToastMessage}
                     />
             </Modal>
+
 
             <Toast
                 isShown={showToastMsg.isShown}

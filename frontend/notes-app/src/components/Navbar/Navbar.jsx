@@ -26,7 +26,7 @@ const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
 
     return (
         // Enhanced Navbar styling: using a light background, more shadow, and stickiness
-        <div className="bg-white flex items-center justify-between px-6 py-3 drop-shadow-md sticky top-0 z-50">
+        <div className="bg-white flex items-center justify-between px-4 py-2 drop-shadow-md top-0 z-50">
             {/* Using a custom primary color from tailwind.config.js for the title */}
             <h2 className="text-2xl font-semibold text-primary py-2">NotesApp</h2>
 
