@@ -1,24 +1,47 @@
-import React from "react";
+import { MdLogout } from "react-icons/md";
 import { getInitials } from "../../utils/helper";
-import { MdLogout } from "react-icons/md"; // Import the logout icon
 
 const ProfileInfo = ({ userInfo, onLogout }) => {
     return (
-        <div className="flex items-center gap-3 ">
+        <div className="flex items-center gap-3">
             <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-slate-100">
                 {getInitials(userInfo?.fullName)}
             </div>
-            
+
             <div>
                 <p className="text-sm font-medium">{userInfo?.fullName}</p>
             </div>
-            
-            <div 
-                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-800 cursor-pointer transition-colors duration-300 ease-in-out hover:bg-red-500 hover:text-white"
+
+            <button
+                style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#4B5563",
+                    transition: "background 0.2s, color 0.2s",
+                    pointerEvents: "all",       
+                    position: "relative",
+                    zIndex: 999,               
+                }}
+                onMouseEnter={e => {
+                    e.currentTarget.style.background = "#ef4444";
+                    e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#4B5563";
+                }}
                 onClick={onLogout}
+                title="Logout"
             >
-                <MdLogout className="text-lg" />
-            </div>
+                <MdLogout style={{ pointerEvents: "none" }} size={20} />
+            </button>
         </div>
     );
 }
