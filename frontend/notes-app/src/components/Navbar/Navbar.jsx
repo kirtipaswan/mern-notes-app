@@ -8,9 +8,9 @@ const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
     const navigate = useNavigate();
 
     const onLogout = () => {
+        console.log("Logout clicked");
         localStorage.clear();
-        navigate("/login", { replace: true }
-        );
+        navigate("/login");
     };
 
     const handleSearch = () => {
@@ -26,7 +26,7 @@ const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
 
     return (
         // Enhanced Navbar styling: using a light background, more shadow, and stickiness
-        <div className="bg-white flex items-center justify-between px-4 py-2 drop-shadow-md top-0 z-50 overflow-visible">
+        <div className="bg-white flex items-center justify-between px-4 py-2 drop-shadow-md top-0 z-50">
             {/* Using a custom primary color from tailwind.config.js for the title */}
             <h2 className="text-2xl font-semibold text-primary py-2">NotesApp</h2>
 
